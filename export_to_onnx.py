@@ -21,8 +21,6 @@ def run():
     imgsz = (640, 640)
     imgsz *= 2 if len(imgsz) == 1 else 1
 
-    gs = int(max(model.stride))  # grid size (max stride)
-    imgsz = [check_img_size(x, gs) for x in imgsz]  # verify img_size are gs-multiples
     im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetection
     print(im.shape, type(im))
 
