@@ -494,8 +494,7 @@ class LoadImagesAndLabels(Dataset):
         # Display cache
         nf, nm, ne, nc, n = cache.pop('results')  # found, missing, empty, corrupt, total
         if exists and LOCAL_RANK in {-1, 0}:
-            d = f"Scanning {cache_path}... {nf} images, {nm + ne} backgrounds, {nc} corrupt"
-            tqdm(None, desc=prefix + d, total=n, initial=n, bar_format=TQDM_BAR_FORMAT)  # display cache results
+            d = f"Scanning {cache_path}... {nf} images, {nm + ne} backgrounds, {nc} corrupt"  # display cache results
             if cache['msgs']:
                 LOGGER.info('\n'.join(cache['msgs']))  # display warnings
         assert nf > 0 or not augment, f'{prefix}No labels found in {cache_path}, can not start training. {HELP_URL}'
@@ -575,15 +574,6 @@ class LoadImagesAndLabels(Dataset):
             self.im_hw0, self.im_hw = [None] * n, [None] * n
             fcn = self.cache_images_to_disk if cache_images == 'disk' else self.load_image
             results = ThreadPool(NUM_THREADS).imap(fcn, range(n))
-            pbar = tqdm(enumerate(results), total=n, bar_format=TQDM_BAR_FORMAT, disable=LOCAL_RANK > 0)
-            for i, x in pbar:
-                if cache_images == 'disk':
-                    b += self.npy_files[i].stat().st_size
-                else:  # 'ram'
-                    self.ims[i], self.im_hw0[i], self.im_hw[i] = x  # im, hw_orig, hw_resized = load_image(self, i)
-                    b += self.ims[i].nbytes
-                pbar.desc = f'{prefix}Caching images ({b / gb:.1f}GB {cache_images})'
-            pbar.close()
 
     # def check_cache_ram(self, safety_margin=0.1, prefix=''):
     #     # Check image caching requirements vs available memory
