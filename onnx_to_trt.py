@@ -1,6 +1,5 @@
 
 
-
 def export_engine(file, half, workspace=4):
     import tensorrt as trt
 

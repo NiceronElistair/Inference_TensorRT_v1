@@ -12,7 +12,7 @@ import time
 from utils import letterbox, scale_boxes, draw_bounding_boxes, non_max_suppression, infer_one_frame, select_camera
 
 # Path to the weights of the neural network file with tensorRT format
-weights = 'yolov5s.engine'
+weights = 'yolov5n.trt'
 # webcan flag
 webcam = True
 # path to save the output
@@ -30,7 +30,7 @@ logger = trt.Logger(trt.Logger.INFO)                            #return log at e
 with open(weights, 'rb') as f, trt.Runtime(logger) as runtime:
     model = runtime.deserialize_cuda_engine(f.read())
 
-context = model.create_execution_context()  # don't know what is that
+context = model.create_execution_context() 
 bindings = OrderedDict()      
 output_names = []
 fp16 = False                # numerical format of the weigths
@@ -51,7 +51,6 @@ for i in range(model.num_bindings):
 # Load the data 
 # Variables responsible for input reshape
 img_size = 640 
-
 cap = select_camera()  # create the camera object
 w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # get width frame  
 h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # get height frame
@@ -59,6 +58,7 @@ four_cc = cv2.VideoWriter_fourcc(*"MJPG")
 out = cv2.VideoWriter(out_file, four_cc, 20, (w, h)) # create a recordered to save the camera stream
 
 
+#inference time
 while True:                 # process frame one by one
     t1 = time.time()
     #load image 
