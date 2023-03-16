@@ -1,12 +1,11 @@
+import argparse
 
-
-def export_engine(file, half, workspace=4):
+def export_engine(file, half, save_name, workspace=4):
     import tensorrt as trt
 
     print(trt.__version__)
 
     onnx = file
-    f = 'yolov5n.trt'
 
     logger = trt.Logger(trt.Logger.INFO)
     builder = trt.Builder(logger)
@@ -29,18 +28,28 @@ def export_engine(file, half, workspace=4):
 
     if builder.platform_has_fast_fp16 and half:
         config.set_flag(trt.BuilderFlag.FP16)
-    with builder.build_engine(network, config) as engine, open(f, 'wb') as t:
+    with builder.build_engine(network, config) as engine, open(save_name, 'wb') as t:
         t.write(engine.serialize())
-    return f, None
+    return save_name, None
 
-def run():
+def run(
+        weights='yolov5n.onnx',
+        save_name='yolov5n.trt'
+):
     half = False
-    file = 'yo.onnx'
 
-    f, _= export_engine(file, half, )
+    f, _= export_engine(weights, half, save_name )
 
-def main():
-    run()
+def parse_opt():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--weights', type=str, help='weights you chose to convert')
+    parser.add_argument('--save-name', type=str, help='file name for the converted weights')   
+    opt = parser.parse_args()
+    return opt
+
+def main(opt):
+    run(**vars(opt))
 
 if __name__ == "__main__":
-    main()
+    opt = parse_opt()
+    main(opt)
