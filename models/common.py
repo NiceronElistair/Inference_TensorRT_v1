@@ -21,7 +21,6 @@ import pandas as pd
 import requests
 import torch
 import torch.nn as nn
-from IPython.display import display
 from PIL import Image
 from torch.cuda import amp
 
@@ -803,7 +802,7 @@ class Detections:
 
             im = Image.fromarray(im.astype(np.uint8)) if isinstance(im, np.ndarray) else im  # from np
             if show:
-                display(im) if is_notebook() else im.show(self.files[i])
+               im.show(self.files[i])
             if save:
                 f = self.files[i]
                 im.save(save_dir / f)  # save
