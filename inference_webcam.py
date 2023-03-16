@@ -54,8 +54,6 @@ img_size = 640
 cap = select_camera()  # create the camera object
 w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # get width frame  
 h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # get height frame
-four_cc = cv2.VideoWriter_fourcc(*"MJPG")      
-out = cv2.VideoWriter(out_file, four_cc, 20, (w, h)) # create a recordered to save the camera stream
 
 
 #inference time
@@ -84,8 +82,6 @@ while True:                 # process frame one by one
     
     im0 = draw_bounding_boxes(det, im0) # draw boundinx box dans print label name and confidence score
 
-    out.write(im0)  # write frame for save
-
     t2 = time.time()
     fps = 1/np.round(t2 - t1, 3) # compute frame rate
 
@@ -97,7 +93,6 @@ while True:                 # process frame one by one
         break
 
 cap.release()
-out.release()
 cv2.destroyAllWindows()
 
     
