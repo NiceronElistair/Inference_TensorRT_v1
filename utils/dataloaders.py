@@ -19,7 +19,6 @@ from threading import Thread
 from urllib.parse import urlparse
 
 import numpy as np
-import psutil
 import torch
 import torch.nn.functional as F
 import torchvision
