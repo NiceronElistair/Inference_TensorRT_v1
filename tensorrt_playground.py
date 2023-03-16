@@ -1,6 +1,3 @@
-from skimage import io
-from skimage.transform import resize
-from matplotlib import pyplot as plt
 import numpy as np
 
 import tensorrt as trt
