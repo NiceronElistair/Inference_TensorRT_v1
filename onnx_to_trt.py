@@ -35,7 +35,7 @@ def export_engine(file, half, workspace=4):
 
 def run():
     half = False
-    file = 'yolov5n.onnx'
+    file = 'yo.onnx'
 
     f, _= export_engine(file, half, )
 
