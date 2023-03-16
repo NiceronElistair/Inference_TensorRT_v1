@@ -20,7 +20,7 @@ def export_engine(file, half, workspace=4):
         raise RuntimeError(f'failed to load ONNX file: {onnx}')
     
     inputs = [network.get_input(i) for i in range(network.num_inputs)]
-    outputs = [network.get_output(i) for i in range(network.num_outputs)]
+    outputs = [network.get_output(0)]
 
     for inp in inputs:
         print(f'input "{inp.name}" with shape{inp.shape} {inp.dtype}')
