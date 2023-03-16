@@ -22,11 +22,8 @@ def select_camera():
     If a camera logitec is pluged on the computer choose the camera pluged
     If no camera is pluged, chose the webcam of the laptop
     """
-    source = 2
+    source = 0
     cap = cv2.VideoCapture(source)
-    if cap is None or not cap.isOpened():
-        source = 0
-        cap = cv2.VideoCapture(source)
     return cap
 
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), scaleup=True):
