@@ -4,8 +4,7 @@ from models.experimental import attempt_load
 
 def export_onnx(model, im):
     f = 'yo.onnx'
-    output_names = ['output0']
-    torch.onnx.export(model, im, f, input_names=['images'], output_names=output_names)
+    torch.onnx.export(model, im, f, input_names=['images'], output_names= ['output0'], verbose=True)
     return f
 
 def run():
@@ -29,8 +28,6 @@ def run():
 
 
     f = export_onnx(model, im)
-
-
 
 def main():
     run()
