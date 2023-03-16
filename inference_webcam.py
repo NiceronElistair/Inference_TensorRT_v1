@@ -9,7 +9,7 @@ from collections import namedtuple, OrderedDict
 import cv2
 import numpy as np
 import time
-from utils import letterbox, scale_boxes, draw_bounding_boxes, non_max_suppression, infer_one_frame, select_camera
+from uutils import letterbox, scale_boxes, draw_bounding_boxes, non_max_suppression, infer_one_frame, select_camera
 
 # Path to the weights of the neural network file with tensorRT format
 weights = 'yolov5n.trt'
