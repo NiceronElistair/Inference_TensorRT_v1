@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from models.experimental import attempt_load
-from utils.general import check_img_size
 
 def export_onnx(model, im):
     f = 'yo.onnx'
