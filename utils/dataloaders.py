@@ -586,22 +586,22 @@ class LoadImagesAndLabels(Dataset):
                 pbar.desc = f'{prefix}Caching images ({b / gb:.1f}GB {cache_images})'
             pbar.close()
 
-    def check_cache_ram(self, safety_margin=0.1, prefix=''):
-        # Check image caching requirements vs available memory
-        b, gb = 0, 1 << 30  # bytes of cached images, bytes per gigabytes
-        n = min(self.n, 30)  # extrapolate from 30 random images
-        for _ in range(n):
-            im = cv2.imread(random.choice(self.im_files))  # sample image
-            ratio = self.img_size / max(im.shape[0], im.shape[1])  # max(h, w)  # ratio
-            b += im.nbytes * ratio ** 2
-        mem_required = b * self.n / n  # GB required to cache dataset into RAM
-        mem = psutil.virtual_memory()
-        cache = mem_required * (1 + safety_margin) < mem.available  # to cache or not to cache, that is the question
-        if not cache:
-            LOGGER.info(f"{prefix}{mem_required / gb:.1f}GB RAM required, "
-                        f"{mem.available / gb:.1f}/{mem.total / gb:.1f}GB available, "
-                        f"{'caching images ✅' if cache else 'not caching images ⚠️'}")
-        return cache
+    # def check_cache_ram(self, safety_margin=0.1, prefix=''):
+    #     # Check image caching requirements vs available memory
+    #     b, gb = 0, 1 << 30  # bytes of cached images, bytes per gigabytes
+    #     n = min(self.n, 30)  # extrapolate from 30 random images
+    #     for _ in range(n):
+    #         im = cv2.imread(random.choice(self.im_files))  # sample image
+    #         ratio = self.img_size / max(im.shape[0], im.shape[1])  # max(h, w)  # ratio
+    #         b += im.nbytes * ratio ** 2
+    #     mem_required = b * self.n / n  # GB required to cache dataset into RAM
+    #     mem = psutil.virtual_memory()
+    #     cache = mem_required * (1 + safety_margin) < mem.available  # to cache or not to cache, that is the question
+    #     if not cache:
+    #         LOGGER.info(f"{prefix}{mem_required / gb:.1f}GB RAM required, "
+    #                     f"{mem.available / gb:.1f}/{mem.total / gb:.1f}GB available, "
+    #                     f"{'caching images ✅' if cache else 'not caching images ⚠️'}")
+    #     return cache
 
     def cache_labels(self, path=Path('./labels.cache'), prefix=''):
         # Cache dataset labels, check images and read shapes
