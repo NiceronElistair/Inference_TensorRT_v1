@@ -6,7 +6,16 @@ from models.experimental import attempt_load
 
 def export_onnx(model, im, save_name):
     f = 'yo.onnx'
-    torch.onnx.export(model, im, save_name, input_names=['images'], output_names= ['output0'], verbose=True)
+    torch.onnx.export(model,
+                       im, 
+                       save_name, 
+                       input_names=['images'], 
+                       output_names= ['output0'], 
+                       verbose=False, 
+                       dynamic_axes= False,
+                       opset_version=17, 
+                       do_constant_folding=False
+                       )
     return f
 
 def run(
@@ -23,8 +32,7 @@ def run(
     imgsz = (640, 640)
     imgsz *= 2 if len(imgsz) == 1 else 1
 
-    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetection
-    print(im.shape, type(im))
+    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetectio
 
     model.eval()
     for _ in range(2):
