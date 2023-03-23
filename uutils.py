@@ -78,6 +78,7 @@ def infer_one_frame(im, model, bindings, context, output_names):
 
     dynamic = False # don't know what is this
 
+    
     s = bindings['images'].shape
     assert im.shape == s, f"input size {im.shape} {'>' if dynamic else 'not equal to'} max model size {s}"
     binding_addrs['images'] = int(im.data_ptr())

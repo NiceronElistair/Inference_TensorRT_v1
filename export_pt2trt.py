@@ -7,8 +7,7 @@ import platform
 import argparse
 
 def export_onnx(model, im, file, opset, dynamic):
-    # YOLOv5 ONNX export
-    check_requirements('onnx>=1.12.0')
+   
     f = file.split('.')[0] + '.onnx'
 
     # print('dynamic', dynamic)
@@ -16,7 +15,7 @@ def export_onnx(model, im, file, opset, dynamic):
     # print('simplify', simplify)
     # print('opset', opset)
 
-    output_names = ['output0']
+    output_names = ['output']
     if dynamic:
         dynamic = {'images': {0: 'batch', 2: 'height', 3: 'width'}} 
 
@@ -34,45 +33,31 @@ def export_onnx(model, im, file, opset, dynamic):
     return f
 
 
-def export_engine(model, im, file, dynamic, workspace=4, verbose=False):
+def export_engine(model, im, file, dynamic, opset, workspace=4, verbose=False):
     # YOLOv5 TensorRT export https://developer.nvidia.com/tensorrt
     assert im.device.type != 'cpu', 'export running on CPU but must be on GPU, i.e. `python export.py --device 0`'
-    try:
-        import tensorrt as trt
-    except Exception:
-        if platform.system() == 'Linux':
-            check_requirements('nvidia-tensorrt', cmds='-U --index-url https://pypi.ngc.nvidia.com')
-        import tensorrt as trt
+    
+    import tensorrt as trt
 
-    if trt.__version__[0] == '7':  # TensorRT 7 handling https://github.com/ultralytics/yolov5/issues/6012
-        grid = model.model[-1].anchor_grid
-        model.model[-1].anchor_grid = [a[..., :1, :1, :] for a in grid]
-        export_onnx(model, im, file, 9, dynamic)  # opset 12
-        model.model[-1].anchor_grid = grid
-    else:  # TensorRT >= 8
-        print('tensor version 8')
-        check_version(trt.__version__, '8.0.0', hard=True)  # require tensorrt>=8.0.0
-        export_onnx(model, im, file, 9, dynamic)  # opset 12
+    check_version(trt.__version__, '8.0.0', hard=True)  # require tensorrt>=8.0.0
+    export_onnx(model, im, file, opset, dynamic)  # opset 12
     onnx = file.split('.')[0] + '.onnx'
-
     f = file.split('.')[0] + '.engine'
-    logger = trt.Logger(trt.Logger.INFO)
-    if verbose:
-        logger.min_severity = trt.Logger.Severity.VERBOSE
 
+    logger = trt.Logger(trt.Logger.INFO)
     builder = trt.Builder(logger)
     config = builder.create_builder_config()
     config.max_workspace_size = workspace * 1 << 30
-    # config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, workspace << 30)  # fix TRT 8.4 deprecation notice
-
     flag = (1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
     network = builder.create_network(flag)
     parser = trt.OnnxParser(network, logger)
+
     if not parser.parse_from_file(str(onnx)):
         raise RuntimeError(f'failed to load ONNX file: {onnx}')
 
     inputs = [network.get_input(i) for i in range(network.num_inputs)]
     outputs = [network.get_output(i) for i in range(network.num_outputs)]
+    
     for inp in inputs:
         LOGGER.info(f'input "{inp.name}" with shape{inp.shape} {inp.dtype}')
     for out in outputs:
@@ -101,11 +86,9 @@ def run(
         device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         include=('torchscript', 'onnx'),  # include formats
         dynamic=False,  # ONNX/TF/TensorRT: dynamic axes
-        opset=12,  # ONNX: opset version
+        opset=9,  # ONNX: opset version
         verbose=False,  # TensorRT: verbose log
         workspace=4,  # TensorRT: workspace size (GB)
-        iou_thres=0.45,  # TF.js NMS: IoU threshold
-        conf_thres=0.25,  # TF.js NMS: confidence threshold
 ):
     include = [x.lower() for x in include]  # to lowercase
 
@@ -130,9 +113,7 @@ def run(
     for _ in range(2):
         y = model(im)  # dry runs
 
-    metadata = {'stride': int(max(model.stride)), 'names': model.names}  # model metadata
-
-    f, _ = export_engine(model, im, file, dynamic, workspace, verbose)
+    f, _ = export_engine(model, im, file, dynamic, opset, workspace, verbose)
     
     # Finish
     f = [str(x) for x in f if x]  # filter out '' and None
@@ -145,11 +126,9 @@ def parse_opt(known=False):
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640, 640], help='image (h, w)')
     parser.add_argument('--batch-size', type=int, default=1, help='batch size')
     parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--opset', type=int, default=17, help='ONNX: opset version')
+    parser.add_argument('--opset', type=int, default=9, help='ONNX: opset version')
     parser.add_argument('--verbose', action='store_true', help='TensorRT: verbose log')
     parser.add_argument('--workspace', type=int, default=4, help='TensorRT: workspace size (GB)')
-    parser.add_argument('--iou-thres', type=float, default=0.45, help='TF.js NMS: IoU threshold')
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='TF.js NMS: confidence threshold')
     parser.add_argument(
         '--include',
         nargs='+',
