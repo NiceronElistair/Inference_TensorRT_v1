@@ -61,10 +61,11 @@ def run(
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # get width frame  
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # get height frame
 
+    prev_frame_time = 0
+    new_frame_time = 0
 
     #inference time
     while True:                 # process frame one by one
-        t1 = time.time()
         #load image 
         _, im0 = cap.read()        # read frame
         
@@ -78,6 +79,8 @@ def run(
         if len(im.shape) == 3:
             im = im[None]  # expand for batch dim
 
+        new_frame_time = time.time()
+
         # inference on one frame
         y = infer_one_frame(im, model, bindings, context, output_names)  # return a tensor that contain coordinates of bounding box    
 
@@ -87,13 +90,13 @@ def run(
         y = non_max_suppression(y, conf_thres=0.25, iou_thres=0.45) # apply non max suppression minimize redundancy of some binding box
         det = y[0] # list of list to list
         det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round() # bounding box coord are not adapted to the im0 frame, need to rescale the coord
-
-        print(det)
         
         im0 = draw_bounding_boxes(det, im0) # draw boundinx box dans print label name and confidence score
 
-        t2 = time.time()
-        fps = 1/np.round(t2 - t1, 3) # compute frame rate
+        fps = 1/(new_frame_time-prev_frame_time)
+        prev_frame_time = new_frame_time
+        fps = int(fps)
+
 
         bottomLeftCornerOfText = (450, 50)
         cv2.putText(im0, f'FPS: {fps}', bottomLeftCornerOfText,cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 1, 2) # print frame rate on frame
