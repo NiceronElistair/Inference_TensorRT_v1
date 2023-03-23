@@ -119,16 +119,17 @@ def non_max_suppression(prediction,conf_thres=0.25, iou_thres=0.45):
         x = x[xc[xi]]                                   # #  Apply the boolean tensor to eliminate all the boxes from x that are under conf_thres                                 
         x[:, 5:] *= x[:, 4:5]                           # conf = obj_conf * cls_proba
         box = xywh2xyxy(x[:, :4])
-        print(x.shape)                       # convert x,y,w,h system into x1, y1, x2, y2 system
-        conf, j = x[:, 5:].max(1, keepdim=True)         # among the the 80 classes proba, return the max with it's corresponding confidence score 
-        x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]        # reduce the size of the tensor from 85 to 6 by removing the class proba of the 79 classes 
-        x = x[x[:, 4].argsort(descending=True)[:]]      # sort by confidence and remove excess boxes from x
+        print(x.shape)
+        if x[0]>0:                       # convert x,y,w,h system into x1, y1, x2, y2 system
+            conf, j = x[:, 5:].max(1, keepdim=True)         # among the the 80 classes proba, return the max with it's corresponding confidence score 
+            x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]        # reduce the size of the tensor from 85 to 6 by removing the class proba of the 79 classes 
+            x = x[x[:, 4].argsort(descending=True)[:]]      # sort by confidence and remove excess boxes from x
 
-        # Batched NMS
-        c = x[:, 5:6] * max_wh  # Applying this strange mnipulation that I don't understand I think it is an offset 
-        boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        i = torchvision.ops.nms(boxes, scores, iou_thres)  # takes box coord, and score, calculate the box_iou with all the boxes from the same class, and then return index of the best boxes j'vais surement coder cette fonction moi même parce qye telecharger torchvision juste poyr ça c'est chiant
-        output[xi] = x[i]
+            # Batched NMS
+            c = x[:, 5:6] * max_wh  # Applying this strange mnipulation that I don't understand I think it is an offset 
+            boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+            i = torchvision.ops.nms(boxes, scores, iou_thres)  # takes box coord, and score, calculate the box_iou with all the boxes from the same class, and then return index of the best boxes j'vais surement coder cette fonction moi même parce qye telecharger torchvision juste poyr ça c'est chiant
+            output[xi] = x[i]
 
     return output
 
