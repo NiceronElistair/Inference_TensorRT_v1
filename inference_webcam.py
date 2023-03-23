@@ -79,10 +79,11 @@ def run(
             im = im[None]  # expand for batch dim
 
         # inference on one frame
-        y = infer_one_frame(im, model, bindings, context, output_names)  # return a tensor that contain coordinates of bounding box, label probability and confience score
+        y = infer_one_frame(im, model, bindings, context, output_names)  # return a tensor that contain coordinates of bounding box
+        print('infer one frame', y)
         y = [y[-1]]
 
-        print(y)  
+        print('apres le -1', y)  
 
 
         y = non_max_suppression(y, conf_thres=0.25, iou_thres=0.45) # apply non max suppression minimize redundancy of some binding box
