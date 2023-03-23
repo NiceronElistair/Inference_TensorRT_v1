@@ -119,7 +119,6 @@ def non_max_suppression(prediction,conf_thres=0.25, iou_thres=0.45):
         x = x[xc[xi]]                                   # #  Apply the boolean tensor to eliminate all the boxes from x that are under conf_thres                                 
         x[:, 5:] *= x[:, 4:5]                           # conf = obj_conf * cls_proba
         box = xywh2xyxy(x[:, :4])
-        print(x.shape)
         if x.shape[0] != 0:                       # convert x,y,w,h system into x1, y1, x2, y2 system
             conf, j = x[:, 5:].max(1, keepdim=True)         # among the the 80 classes proba, return the max with it's corresponding confidence score 
             x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]        # reduce the size of the tensor from 85 to 6 by removing the class proba of the 79 classes 
