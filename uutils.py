@@ -114,7 +114,9 @@ def non_max_suppression(prediction,conf_thres=0.25, iou_thres=0.45):
 
     output = [torch.zeros((0, 6), device=device)] * bs # initialisation of the output tensor 
 
-    if len(prediction):
+    print(len(prediction))
+
+    if len(prediction) > 0:
         for xi, x in enumerate(prediction):  # in our case there is only one iteration because our batch size = 1
             
             x = x[xc[xi]]                                   # #  Apply the boolean tensor to eliminate all the boxes from x that are under conf_thres                                 
