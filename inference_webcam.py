@@ -79,20 +79,16 @@ def run(
             im = im[None]  # expand for batch dim
 
         # inference on one frame
-        y = infer_one_frame(im, model, bindings, context, output_names)  # return a tensor that contain coordinates of bounding box
-    
-        print(len(y))
-        for i in y:
-            print(len(i))    
+        y = infer_one_frame(im, model, bindings, context, output_names)  # return a tensor that contain coordinates of bounding box    
 
-        y = [y[-1]]
-
-        print('apres le -y', y[0].shape) 
+        y = [y[-1]] 
 
 
         y = non_max_suppression(y, conf_thres=0.25, iou_thres=0.45) # apply non max suppression minimize redundancy of some binding box
         det = y[0] # list of list to list
         det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round() # bounding box coord are not adapted to the im0 frame, need to rescale the coord
+
+        print(det)
         
         im0 = draw_bounding_boxes(det, im0) # draw boundinx box dans print label name and confidence score
 
