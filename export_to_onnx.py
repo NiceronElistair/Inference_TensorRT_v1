@@ -3,7 +3,6 @@ import argparse
 import torch
 import torch.nn as nn
 from models.experimental import attempt_load
-import onnx 
 import json
 
 def export_onnx(model, im, save_name, verbose, dynamic, opset):
